@@ -5,6 +5,7 @@ import static decola.tech.board.persistence.config.ConnectionConfig.getConnectio
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import liquibase.Liquibase;
@@ -15,6 +16,8 @@ import lombok.AllArgsConstructor;;
 
 @AllArgsConstructor
 public class MigrationStrategy {
+    
+    public final Connection connection;
 
     public void executeMigration() {
         var originalOut = System.out;
