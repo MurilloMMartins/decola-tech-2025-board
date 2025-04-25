@@ -37,7 +37,7 @@ public class BoardColumnDAO {
 
     public List<BoardColumnEntity> findByBoardId(Long id) throws SQLException {
         List<BoardColumnEntity> entities = new ArrayList<>();
-        var sql = "SELECT id, name, `order` FROM boards_columns WHERE board_id = ? ORDER BY `order`";
+        var sql = "SELECT id, name, `order`, type FROM boards_columns WHERE board_id = ? ORDER BY `order`";
         try (var statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
             statement.executeQuery();
