@@ -20,7 +20,6 @@ public class MainMenu {
     public void execute() throws SQLException {
         System.out.println("Welcome to the board manager, please select an action:");
         var option = -1;
-
         while (true) {
             System.out.println("1 - Create a new board.");
             System.out.println("2 - Select an existing board.");
@@ -69,7 +68,7 @@ public class MainMenu {
 
         System.out.println("Please type the name of the canceled column:");
         var canceledColumnName = scanner.next();
-        var canceledColumn = createColumn(canceledColumnName, BoardColumnTypeEnum.CANCELED, additionalColumns + 1);
+        var canceledColumn = createColumn(canceledColumnName, BoardColumnTypeEnum.CANCELED, additionalColumns + 2);
         columns.add(canceledColumn);
 
         entity.setBoardColumns(columns);

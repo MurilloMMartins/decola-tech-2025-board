@@ -8,14 +8,14 @@ import static decola.tech.board.persistence.config.ConnectionConfig.getConnectio
 import java.sql.SQLException;
 
 import decola.tech.board.persistence.migration.MigrationStrategy;
+import decola.tech.board.ui.MainMenu;
 
 public class App {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException{
         try (var connection = getConnection()) {
             new MigrationStrategy(connection).executeMigration();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+        new MainMenu().execute();
     }
 }
