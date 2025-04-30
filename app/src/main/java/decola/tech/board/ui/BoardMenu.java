@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class BoardMenu {
 
-    private final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in).useDelimiter("\n");
 
     private final BoardEntity entity;
 
