@@ -32,11 +32,11 @@ public class BoardMenu {
             switch (option) {
                 case 1 -> createCard();
                 case 2 -> moveCardToNextColumn();
-                case 3 -> unlockCard();
+                case 3 -> lockCard();
                 case 4 -> unlockCard();
                 case 5 -> cancelCard();
-                case 6 -> showCard();
-                case 7 -> showCard();
+                case 6 -> showBoard();
+                case 7 -> showColumn();
                 case 8 -> showCard();
                 case 9 -> System.out.println("Returning to previous menu.");
                 case 10 -> System.exit(0);
@@ -56,6 +56,11 @@ public class BoardMenu {
         throw new UnsupportedOperationException("Unimplemented method 'moveCardToNextColumn'");
     }
 
+    private Object lockCard() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'lockCard'");
+    }
+
     private Object unlockCard() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'unlockCard'");
@@ -64,6 +69,16 @@ public class BoardMenu {
     private Object cancelCard() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'cancelCard'");
+    }
+
+    private Object showBoard() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'showBoard'");
+    }
+
+    private Object showColumn() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'showColumn'");
     }
 
     private Object showCard() {
