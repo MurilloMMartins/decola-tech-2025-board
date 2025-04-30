@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.mysql.cj.jdbc.StatementImpl;
 
+import decola.tech.board.dto.BoardColumnDTO;
 import decola.tech.board.persistence.entity.BoardColumnEntity;
 import lombok.RequiredArgsConstructor;
 
@@ -50,8 +51,35 @@ public class BoardColumnDAO {
                 entity.setType(findByName(resultSet.getString("type")));
                 entities.add(entity);
             }
-
+            return entities;
         }
-        throw new UnsupportedOperationException("Unimplemented method 'findByBoardId'");
+    }
+
+    public List<BoardColumnDTO> findByBoardIdWithDetails(Long id) throws SQLException {
+        List<BoardColumnDTO> dtos = new ArrayList<>();
+        var sql = """
+                    SELECT  bc.id, 
+                            bc.name, 
+                            bc.type, 
+                            COUNT(SELECT c.id FROM cards c WHERE c.board_column_id = bc.id) cards_amount 
+                        FROM boards_columns bc
+                        WHERE board_id = ? 
+                        ORDER BY `order`
+                """;
+        try (var statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, id);
+            statement.executeQuery();
+            var resultSet = statement.getResultSet();
+            while (resultSet.next()) {
+                var dto = new BoardColumnDTO(
+                    resultSet.getLong("bc.id"),
+                    resultSet.getString("bc.name"),
+                    findByName(resultSet.getString("bc.type")),
+                    resultSet.getInt("cards_amount")
+                );
+                dtos.add(dto);
+            }
+            return dtos;
+        }
     }
 }
