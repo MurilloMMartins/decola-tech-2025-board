@@ -2,8 +2,10 @@ package decola.tech.board.dto;
 
 import java.time.OffsetDateTime;
 
-public record CardDetails(
+public record CardDetailsDTO(
         Long id,
+        String title,
+        String description,
         boolean locked,
         OffsetDateTime lockedAt,
         String lockReason,
