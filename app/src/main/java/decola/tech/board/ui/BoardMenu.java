@@ -6,10 +6,13 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import decola.tech.board.persistence.entity.BoardColumnEntity;
+import decola.tech.board.persistence.entity.BoardColumnTypeEnum;
 import decola.tech.board.persistence.entity.BoardEntity;
+import decola.tech.board.persistence.entity.CardEntity;
 import decola.tech.board.service.BoardColumnQueryService;
 import decola.tech.board.service.BoardQueryService;
 import decola.tech.board.service.CardQueryService;
+import decola.tech.board.service.CardService;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -21,7 +24,7 @@ public class BoardMenu {
 
     public void execute() {
         try {
-            System.out.printf("Welcome to board %s, please select an action:", entity.getId());
+            System.out.printf("Welcome to board %s, please select an action:\n", entity.getId());
             var option = -1;
             while (option != 9) {
                 System.out.println("1 - Create a card.");
@@ -58,9 +61,17 @@ public class BoardMenu {
         }
     }
 
-    private Object createCard() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createCard'");
+    private void createCard() throws SQLException {
+        var card = new CardEntity();
+        System.out.println("Informe o título do card:");
+        card.setTitle(scanner.next());
+        System.out.println("Informe a descrição do card:");
+        card.setDescription(scanner.next());
+        card.setBoardColumn(entity.getFirstColumn());
+
+        try (var connection = getConnection()) {
+            new CardService(connection).insert(card);
+        }
     }
 
     private Object moveCardToNextColumn() {
@@ -122,8 +133,8 @@ public class BoardMenu {
                         System.out.printf("Card %s - %s.\n", c.id(), c.title());
                         System.out.printf("Descrição: %s\n", c.description());
                         System.out.println(c.locked() ? "Está bloqueado. Motivo: " + c.lockReason() : "Não está bloqueado.");
-                        System.out.printf("Já foi bloqueado %s vezes.", c.lockAmount());
-                        System.out.printf("Está no momento na coluna %s - %s", c.columnId(), c.columnName());
+                        System.out.printf("Já foi bloqueado %s vezes.\n", c.lockAmount());
+                        System.out.printf("Está no momento na coluna %s - %s\n", c.columnId(), c.columnName());
                     }, 
                     () -> System.out.printf("Não existe um card com o id %s\n", selectedCardId));
         }

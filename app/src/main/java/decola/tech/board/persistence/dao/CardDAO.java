@@ -6,7 +6,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import com.mysql.cj.jdbc.StatementImpl;
+
 import decola.tech.board.dto.CardDetailsDTO;
+import decola.tech.board.persistence.entity.CardEntity;
 import lombok.AllArgsConstructor;
 
 import static decola.tech.board.persistence.converter.OffsetDateTimeConverter.toOffsetDateTime;
@@ -15,6 +18,23 @@ import static decola.tech.board.persistence.converter.OffsetDateTimeConverter.to
 public class CardDAO {
 
     private final Connection connection;
+    
+    public CardEntity insert(final CardEntity entity) throws SQLException {
+        var sql = "INSERT INTO cards (title, description, board_column_id) VALUES (?, ?, ?);";
+        try (var statement = connection.prepareStatement(sql)) {
+            var i = 1;
+            statement.setString(i++, entity.getTitle());
+            statement.setString(i++, entity.getDescription());
+            statement.setLong(i++, entity.getBoardColumn().getId());
+
+            statement.executeUpdate();
+            if (statement instanceof StatementImpl impl) {
+                entity.setId(impl.getLastInsertID());
+            }
+        }
+
+        return entity;
+    }
 
     public Optional<CardDetailsDTO> findById(final Long id) throws SQLException {
         var sql = """
@@ -34,7 +54,7 @@ public class CardDAO {
                     AND l.unlocked_at IS NULL
                 INNER JOIN boards_columns bc
                     ON bc.id = c.board_column_id
-                WHERE id = ?;
+                WHERE c.id = ?;
                 """;
 
         try (var statement = connection.prepareStatement(sql)) {

@@ -16,4 +16,9 @@ public class BoardEntity {
     @EqualsAndHashCode.Exclude
     private List<BoardColumnEntity> boardColumns = new ArrayList<>();
 
+    public BoardColumnEntity getFirstColumn() {
+        return boardColumns.stream()
+                .filter(bc -> bc.getType().equals(BoardColumnTypeEnum.TODO))
+                .findFirst().orElseThrow();
+    }
 }
