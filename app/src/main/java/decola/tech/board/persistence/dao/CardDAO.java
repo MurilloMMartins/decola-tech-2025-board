@@ -1,5 +1,7 @@
 package decola.tech.board.persistence.dao;
 
+import static java.util.Objects.nonNull;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -23,7 +25,7 @@ public class CardDAO {
                        l.lock_reason,
                        c.board_column_id,
                        bc.name,
-                       COUNT(SELECT sub_l.id
+                       (SELECT COUNT(sub_l.id)
                              FROM locks sub_l
                              WHERE sub_l.id = c.id) locks_amount
                 FROM cards c
@@ -45,7 +47,7 @@ public class CardDAO {
                     resultSet.getLong("c.id"),
                     resultSet.getString("c.title"),
                     resultSet.getString("c.description"),
-                    resultSet.getString("l.lock_reason").isEmpty(),
+                    nonNull(resultSet.getString("l.lock_reason")),
                     toOffsetDateTime(resultSet.getTimestamp("l.locked_at")),
                     resultSet.getString("l.lock_reason"),
                     resultSet.getInt("locks_amount"),

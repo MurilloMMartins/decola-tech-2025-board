@@ -1,6 +1,7 @@
 package decola.tech.board.persistence.dao;
 
 import static decola.tech.board.persistence.entity.BoardColumnTypeEnum.findByName;
+import static java.util.Objects.isNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -63,10 +64,10 @@ public class BoardColumnDAO {
                     SELECT  bc.id,
                             bc.name,
                             bc.type,
-                            COUNT(SELECT c.id FROM cards c WHERE c.board_column_id = bc.id) cards_amount
+                            (SELECT COUNT(c.id) FROM cards c WHERE c.board_column_id = bc.id) cards_amount
                         FROM boards_columns bc
                         WHERE board_id = ?
-                        ORDER BY `order`
+                        ORDER BY `order`;
                 """;
         try (var statement = connection.prepareStatement(sql)) {
             statement.setLong(1, boardId);
@@ -92,7 +93,7 @@ public class BoardColumnDAO {
                             c.title,
                             c.description
                         FROM boards_columns bc
-                        INNER JOIN cards c
+                        LEFT JOIN cards c
                             ON c.board_column_id = bc.id
                         WHERE bc.id = ?
                 """;
@@ -105,12 +106,17 @@ public class BoardColumnDAO {
                 entity.setName(resultSet.getString("bc.name"));
                 entity.setType(findByName(resultSet.getString("bc.type")));
                 do {
+                    if (isNull(resultSet.getString("c.title"))) {
+                        break;
+                    }
                     var card = new CardEntity();
                     card.setId(resultSet.getLong("c.id"));
                     card.setTitle(resultSet.getString("c.title"));
                     card.setDescription(resultSet.getString("c.description"));
                     entity.getCards().add(card);
                 } while (resultSet.next());
+                
+                return Optional.of(entity);
             }
             return Optional.empty();
         }
