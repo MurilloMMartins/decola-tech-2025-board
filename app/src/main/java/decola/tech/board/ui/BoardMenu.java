@@ -97,9 +97,18 @@ public class BoardMenu {
         throw new UnsupportedOperationException("Unimplemented method 'unlockCard'");
     }
 
-    private Object cancelCard() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'cancelCard'");
+    private void cancelCard() throws SQLException {
+        System.out.println("Informe o id do card que deseja mover para a próxima coluna:");
+        var cardId = scanner.nextLong();
+        var canceledColumn = entity.getCancelColumn();
+        var boardColumnsInfo = entity.getBoardColumns().stream()
+                .map(bc -> new BoardColumnInfoDTO(bc.getId(), bc.getOrder(), bc.getType()))
+                .toList();
+        try (var connection = getConnection()) {
+            new CardService(connection).cancel(cardId, canceledColumn.getId(), boardColumnsInfo);
+        } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private void showBoard() throws SQLException {
@@ -119,14 +128,16 @@ public class BoardMenu {
         var selectedColumn = -1L;
         while (!columnsId.contains(selectedColumn)) {
             System.out.printf("Escolha uma coluna do board %s\n", entity.getName());
-            entity.getBoardColumns().forEach(c -> System.out.printf("%s - %s [%s]\n", c.getId(), c.getName(), c.getType()));
+            entity.getBoardColumns()
+                    .forEach(c -> System.out.printf("%s - %s [%s]\n", c.getId(), c.getName(), c.getType()));
             selectedColumn = scanner.nextLong();
         }
         try (var connection = getConnection()) {
             var column = new BoardColumnQueryService(connection).findById(selectedColumn);
             column.ifPresent(co -> {
                 System.out.printf("Coluna %s tipo %s\n", co.getName(), co.getType());
-                co.getCards().forEach(ca -> System.out.printf("Card %s - %s\n Descrição: %s\n", ca.getId(), ca.getTitle(), ca.getDescription()));
+                co.getCards().forEach(ca -> System.out.printf("Card %s - %s\n Descrição: %s\n", ca.getId(),
+                        ca.getTitle(), ca.getDescription()));
             });
         }
     }
@@ -136,15 +147,16 @@ public class BoardMenu {
         var selectedCardId = scanner.nextLong();
         try (var connection = getConnection()) {
             new CardQueryService(connection).findById(selectedCardId)
-                .ifPresentOrElse(
-                    c -> {
-                        System.out.printf("Card %s - %s.\n", c.id(), c.title());
-                        System.out.printf("Descrição: %s\n", c.description());
-                        System.out.println(c.locked() ? "Está bloqueado. Motivo: " + c.lockReason() : "Não está bloqueado.");
-                        System.out.printf("Já foi bloqueado %s vezes.\n", c.lockAmount());
-                        System.out.printf("Está no momento na coluna %s - %s\n", c.columnId(), c.columnName());
-                    }, 
-                    () -> System.out.printf("Não existe um card com o id %s\n", selectedCardId));
+                    .ifPresentOrElse(
+                            c -> {
+                                System.out.printf("Card %s - %s.\n", c.id(), c.title());
+                                System.out.printf("Descrição: %s\n", c.description());
+                                System.out.println(c.locked() ? "Está bloqueado. Motivo: " + c.lockReason()
+                                        : "Não está bloqueado.");
+                                System.out.printf("Já foi bloqueado %s vezes.\n", c.lockAmount());
+                                System.out.printf("Está no momento na coluna %s - %s\n", c.columnId(), c.columnName());
+                            },
+                            () -> System.out.printf("Não existe um card com o id %s\n", selectedCardId));
         }
     }
 

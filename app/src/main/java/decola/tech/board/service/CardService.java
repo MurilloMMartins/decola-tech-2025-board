@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import decola.tech.board.dto.BoardColumnInfoDTO;
+import decola.tech.board.dto.CardDetailsDTO;
 import decola.tech.board.exception.CardFinishedException;
 import decola.tech.board.exception.CardLockedException;
 import decola.tech.board.exception.EntityNotFoundException;
@@ -29,29 +30,64 @@ public class CardService {
             throw ex;
         }
     }
-    
-    public void moveToNextColumn(final Long cardId, final List<BoardColumnInfoDTO> boardColumnsInfo) throws SQLException {
+
+    public void moveToNextColumn(final Long cardId, final List<BoardColumnInfoDTO> boardColumnsInfo)
+            throws SQLException {
         try {
             var dao = new CardDAO(connection);
             var optional = dao.findById(cardId);
             var dto = optional.orElseThrow(
-                () -> new EntityNotFoundException("O card de if %s não foi encontrado".formatted(cardId))
-            );
+                    () -> new EntityNotFoundException("O card de if %s não foi encontrado".formatted(cardId)));
 
             if (dto.locked()) {
-                throw new CardLockedException("O card %s está bloqueado, é necessário desbloquea-lo para mover".formatted(cardId));
+                throw new CardLockedException(
+                        "O card %s está bloqueado, é necessário desbloquea-lo para mover".formatted(cardId));
             }
             var currentColumn = boardColumnsInfo.stream()
-                .filter(bc -> bc.id().equals(dto.columnId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("O card informado pertence a outro board."));
+                    .filter(bc -> bc.id().equals(dto.columnId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("O card informado pertence a outro board."));
             if (currentColumn.type().equals(BoardColumnTypeEnum.COMPLETED)) {
                 throw new CardFinishedException("O card já foi finalizado.");
 
             }
-            
-            var nextColumn = boardColumnsInfo.stream().filter(bc -> bc.order() == currentColumn.order() + 1).findFirst().orElseThrow();
+
+            var nextColumn = boardColumnsInfo.stream()
+                    .filter(bc -> bc.order() == currentColumn.order() + 1)
+                    .findFirst().orElseThrow(() -> new IllegalStateException("O card está cancelado."));
             dao.moveToColumn(nextColumn.id(), cardId);
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        }
+    }
+
+    public void cancel(final Long cardId, final Long cancelColumnId, final List<BoardColumnInfoDTO> boardColumnsInfo) throws SQLException {
+        try {
+            var dao = new CardDAO(connection);
+            var optional = dao.findById(cardId);
+            var dto = optional.orElseThrow(
+                    () -> new EntityNotFoundException("O card de if %s não foi encontrado".formatted(cardId)));
+
+            if (dto.locked()) {
+                throw new CardLockedException(
+                        "O card %s está bloqueado, é necessário desbloquea-lo para mover".formatted(cardId));
+            }
+            var currentColumn = boardColumnsInfo.stream()
+                    .filter(bc -> bc.id().equals(dto.columnId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("O card informado pertence a outro board."));
+            if (currentColumn.type().equals(BoardColumnTypeEnum.COMPLETED)) {
+                throw new CardFinishedException("O card já foi finalizado.");
+
+            }
+
+            boardColumnsInfo.stream()
+                    .filter(bc -> bc.order() == currentColumn.order() + 1)
+                    .findFirst().orElseThrow(() -> new IllegalStateException("O card está cancelado."));
+            
+            dao.moveToColumn(cancelColumnId, cardId);
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
