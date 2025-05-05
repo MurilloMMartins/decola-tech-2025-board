@@ -5,8 +5,8 @@ import static decola.tech.board.persistence.config.ConnectionConfig.getConnectio
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import decola.tech.board.dto.BoardColumnInfoDTO;
 import decola.tech.board.persistence.entity.BoardColumnEntity;
-import decola.tech.board.persistence.entity.BoardColumnTypeEnum;
 import decola.tech.board.persistence.entity.BoardEntity;
 import decola.tech.board.persistence.entity.CardEntity;
 import decola.tech.board.service.BoardColumnQueryService;
@@ -74,9 +74,17 @@ public class BoardMenu {
         }
     }
 
-    private Object moveCardToNextColumn() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'moveCardToNextColumn'");
+    private void moveCardToNextColumn() throws SQLException {
+        System.out.println("Informe o id do card que deseja mover para a próxima coluna:");
+        var cardId = scanner.nextLong();
+        var boardColumnsInfo = entity.getBoardColumns().stream()
+                .map(bc -> new BoardColumnInfoDTO(bc.getId(), bc.getOrder(), bc.getType()))
+                .toList();
+        try (var connection = getConnection()) {
+            new CardService(connection).moveToNextColumn(cardId, boardColumnsInfo);
+        } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private Object lockCard() {
