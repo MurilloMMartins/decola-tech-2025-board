@@ -57,7 +57,7 @@ public class CardDAO {
                        bc.name,
                        (SELECT COUNT(sub_l.id)
                              FROM locks sub_l
-                             WHERE sub_l.id = c.id) locks_amount
+                             WHERE sub_l.card_id = c.id) locks_amount
                 FROM cards c
                 LEFT JOIN locks l
                     ON c.id = l.card_id
