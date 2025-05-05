@@ -12,7 +12,7 @@ import decola.tech.board.ui.MainMenu;
 
 public class App {
 
-    public static void main(String[] args) throws SQLException{
+    public static void main(String[] args) throws SQLException {
         try (var connection = getConnection()) {
             new MigrationStrategy(connection).executeMigration();
         }

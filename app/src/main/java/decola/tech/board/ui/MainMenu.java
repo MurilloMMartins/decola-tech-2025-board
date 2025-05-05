@@ -1,5 +1,7 @@
 package decola.tech.board.ui;
 
+import static decola.tech.board.persistence.config.ConnectionConfig.getConnection;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +12,6 @@ import decola.tech.board.persistence.entity.BoardColumnTypeEnum;
 import decola.tech.board.persistence.entity.BoardEntity;
 import decola.tech.board.service.BoardQueryService;
 import decola.tech.board.service.BoardService;
-
-import static decola.tech.board.persistence.config.ConnectionConfig.getConnection;
 
 public class MainMenu {
 
@@ -86,8 +86,7 @@ public class MainMenu {
             var optional = queryService.findById(id);
             optional.ifPresentOrElse(
                     b -> new BoardMenu(b).execute(),
-                    () -> System.out.printf("Board with id %s was not found\n", id)
-            );
+                    () -> System.out.printf("Board with id %s was not found\n", id));
         }
     }
 

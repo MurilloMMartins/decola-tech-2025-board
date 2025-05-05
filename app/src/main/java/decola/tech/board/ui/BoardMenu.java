@@ -92,12 +92,12 @@ public class BoardMenu {
         var cardId = scanner.nextLong();
         System.out.println("Informe o motivo do bloqueio do card:");
         var reason = scanner.next();
-        
+
         var boardColumnsInfo = entity.getBoardColumns().stream()
                 .map(bc -> new BoardColumnInfoDTO(bc.getId(), bc.getOrder(), bc.getType()))
                 .toList();
 
-        try(var connection = getConnection()) {
+        try (var connection = getConnection()) {
             new CardService(connection).lock(cardId, reason, boardColumnsInfo);
         } catch (RuntimeException ex) {
             System.out.println(ex.getMessage());
@@ -109,7 +109,7 @@ public class BoardMenu {
         var cardId = scanner.nextLong();
         System.out.println("Informe o motivo do desbloqueio do card:");
         var reason = scanner.next();
-        try(var connection = getConnection()) {
+        try (var connection = getConnection()) {
             new CardService(connection).unlock(cardId, reason);
         } catch (RuntimeException ex) {
             System.out.println(ex.getMessage());

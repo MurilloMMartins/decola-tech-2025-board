@@ -1,5 +1,6 @@
 package decola.tech.board.persistence.dao;
 
+import static decola.tech.board.persistence.converter.OffsetDateTimeConverter.toOffsetDateTime;
 import static java.util.Objects.nonNull;
 
 import java.sql.Connection;
@@ -12,13 +13,11 @@ import decola.tech.board.dto.CardDetailsDTO;
 import decola.tech.board.persistence.entity.CardEntity;
 import lombok.AllArgsConstructor;
 
-import static decola.tech.board.persistence.converter.OffsetDateTimeConverter.toOffsetDateTime;
-
 @AllArgsConstructor
 public class CardDAO {
 
     private final Connection connection;
-    
+
     public CardEntity insert(final CardEntity entity) throws SQLException {
         var sql = "INSERT INTO cards (title, description, board_column_id) VALUES (?, ?, ?);";
         try (var statement = connection.prepareStatement(sql)) {
@@ -35,7 +34,7 @@ public class CardDAO {
 
         return entity;
     }
-    
+
     public void moveToColumn(final Long columnId, final Long cardId) throws SQLException {
         var sql = "UPDATE cards SET board_column_id = ? WHERE id = ?;";
         try (var statement = connection.prepareStatement(sql)) {
@@ -74,16 +73,15 @@ public class CardDAO {
             var resultSet = statement.getResultSet();
             if (resultSet.next()) {
                 var dto = new CardDetailsDTO(
-                    resultSet.getLong("c.id"),
-                    resultSet.getString("c.title"),
-                    resultSet.getString("c.description"),
-                    nonNull(resultSet.getString("l.lock_reason")),
-                    toOffsetDateTime(resultSet.getTimestamp("l.locked_at")),
-                    resultSet.getString("l.lock_reason"),
-                    resultSet.getInt("locks_amount"),
-                    resultSet.getLong("c.board_column_id"),
-                    resultSet.getString("bc.name")
-                );
+                        resultSet.getLong("c.id"),
+                        resultSet.getString("c.title"),
+                        resultSet.getString("c.description"),
+                        nonNull(resultSet.getString("l.lock_reason")),
+                        toOffsetDateTime(resultSet.getTimestamp("l.locked_at")),
+                        resultSet.getString("l.lock_reason"),
+                        resultSet.getInt("locks_amount"),
+                        resultSet.getLong("c.board_column_id"),
+                        resultSet.getString("bc.name"));
                 return Optional.of(dto);
             }
         }

@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class BoardColumnQueryService {
-    
+
     private final Connection connection;
 
     public Optional<BoardColumnEntity> findById(final Long id) throws SQLException {

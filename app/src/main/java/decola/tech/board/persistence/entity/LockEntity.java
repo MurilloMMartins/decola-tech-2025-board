@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class LockEntity {
-    
+
     private Long id;
     private OffsetDateTime lockedAt;
     private String lockReason;

@@ -115,7 +115,7 @@ public class BoardColumnDAO {
                     card.setDescription(resultSet.getString("c.description"));
                     entity.getCards().add(card);
                 } while (resultSet.next());
-                
+
                 return Optional.of(entity);
             }
             return Optional.empty();

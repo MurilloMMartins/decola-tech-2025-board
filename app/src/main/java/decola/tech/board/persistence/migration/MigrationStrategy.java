@@ -16,7 +16,7 @@ import lombok.AllArgsConstructor;;
 
 @AllArgsConstructor
 public class MigrationStrategy {
-    
+
     public final Connection connection;
 
     public void executeMigration() {

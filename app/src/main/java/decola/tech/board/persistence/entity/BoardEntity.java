@@ -20,11 +20,11 @@ public class BoardEntity {
     public BoardColumnEntity getFirstColumn() {
         return getFilteredColumn(bc -> bc.getType().equals(BoardColumnTypeEnum.TODO));
     }
-    
+
     public BoardColumnEntity getCancelColumn() {
         return getFilteredColumn(bc -> bc.getType().equals(BoardColumnTypeEnum.CANCELED));
     }
-    
+
     private BoardColumnEntity getFilteredColumn(Predicate<BoardColumnEntity> filter) {
         return boardColumns.stream()
                 .filter(filter)
