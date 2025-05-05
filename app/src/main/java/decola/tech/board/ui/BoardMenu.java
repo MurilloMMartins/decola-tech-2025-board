@@ -98,7 +98,7 @@ public class BoardMenu {
     }
 
     private void cancelCard() throws SQLException {
-        System.out.println("Informe o id do card que deseja mover para a próxima coluna:");
+        System.out.println("Informe o id do card que deseja mover para a coluna de cancelamento");
         var cardId = scanner.nextLong();
         var canceledColumn = entity.getCancelColumn();
         var boardColumnsInfo = entity.getBoardColumns().stream()
