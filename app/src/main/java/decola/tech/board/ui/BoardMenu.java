@@ -63,9 +63,9 @@ public class BoardMenu {
 
     private void createCard() throws SQLException {
         var card = new CardEntity();
-        System.out.println("Informe o título do card:");
+        System.out.println("Enter your card's title:");
         card.setTitle(scanner.next());
-        System.out.println("Informe a descrição do card:");
+        System.out.println("Enter your card's description:");
         card.setDescription(scanner.next());
         card.setBoardColumn(entity.getFirstColumn());
 
@@ -75,7 +75,7 @@ public class BoardMenu {
     }
 
     private void moveCardToNextColumn() throws SQLException {
-        System.out.println("Informe o id do card que deseja mover para a próxima coluna:");
+        System.out.println("Enter the id of the card you wish to move to the next column:");
         var cardId = scanner.nextLong();
         var boardColumnsInfo = entity.getBoardColumns().stream()
                 .map(bc -> new BoardColumnInfoDTO(bc.getId(), bc.getOrder(), bc.getType()))
@@ -88,9 +88,9 @@ public class BoardMenu {
     }
 
     private void lockCard() throws SQLException {
-        System.out.println("Informe o id do card que será bloqueado:");
+        System.out.println("Enter the id of the card that you want to lock:");
         var cardId = scanner.nextLong();
-        System.out.println("Informe o motivo do bloqueio do card:");
+        System.out.println("Enter the reason for locking this card:");
         var reason = scanner.next();
 
         var boardColumnsInfo = entity.getBoardColumns().stream()
@@ -105,9 +105,9 @@ public class BoardMenu {
     }
 
     private void unlockCard() throws SQLException {
-        System.out.println("Informe o id do card que será desbloqueado:");
+        System.out.println("Enter the id of the card that you want to unlock:");
         var cardId = scanner.nextLong();
-        System.out.println("Informe o motivo do desbloqueio do card:");
+        System.out.println("Enter the reason for unlocking this card:");
         var reason = scanner.next();
         try (var connection = getConnection()) {
             new CardService(connection).unlock(cardId, reason);
@@ -117,7 +117,7 @@ public class BoardMenu {
     }
 
     private void cancelCard() throws SQLException {
-        System.out.println("Informe o id do card que deseja mover para a coluna de cancelamento");
+        System.out.println("Enter the id of the card you wish to move to the canceled column:");
         var cardId = scanner.nextLong();
         var canceledColumn = entity.getCancelColumn();
         var boardColumnsInfo = entity.getBoardColumns().stream()
@@ -136,7 +136,7 @@ public class BoardMenu {
             optional.ifPresent(b -> {
                 System.out.printf("Board [%s,%s]\n", b.id(), b.name());
                 b.columns().forEach(c -> {
-                    System.out.printf("Coluna [%s] tipo: [%s], tem %s cards.\n", c.name(), c.type(), c.cardsAmount());
+                    System.out.printf("Column [%s] type: [%s], has %s cards.\n", c.name(), c.type(), c.cardsAmount());
                 });
             });
         }
@@ -146,7 +146,7 @@ public class BoardMenu {
         var columnsId = entity.getBoardColumns().stream().map(BoardColumnEntity::getId).toList();
         var selectedColumn = -1L;
         while (!columnsId.contains(selectedColumn)) {
-            System.out.printf("Escolha uma coluna do board %s\n", entity.getName());
+            System.out.printf("Choose a column from board %s\n", entity.getName());
             entity.getBoardColumns()
                     .forEach(c -> System.out.printf("%s - %s [%s]\n", c.getId(), c.getName(), c.getType()));
             selectedColumn = scanner.nextLong();
@@ -154,28 +154,28 @@ public class BoardMenu {
         try (var connection = getConnection()) {
             var column = new BoardColumnQueryService(connection).findById(selectedColumn);
             column.ifPresent(co -> {
-                System.out.printf("Coluna %s tipo %s\n", co.getName(), co.getType());
-                co.getCards().forEach(ca -> System.out.printf("Card %s - %s\n Descrição: %s\n", ca.getId(),
+                System.out.printf("Column %s type %s\n", co.getName(), co.getType());
+                co.getCards().forEach(ca -> System.out.printf("Card %s - %s\n Description: %s\n", ca.getId(),
                         ca.getTitle(), ca.getDescription()));
             });
         }
     }
 
     private void showCard() throws SQLException {
-        System.out.println("Informe o id do card que deseja visualizar:");
+        System.out.println("Enter the id of the card you wish to visualize:");
         var selectedCardId = scanner.nextLong();
         try (var connection = getConnection()) {
             new CardQueryService(connection).findById(selectedCardId)
                     .ifPresentOrElse(
                             c -> {
                                 System.out.printf("Card %s - %s.\n", c.id(), c.title());
-                                System.out.printf("Descrição: %s\n", c.description());
-                                System.out.println(c.locked() ? "Está bloqueado. Motivo: " + c.lockReason()
-                                        : "Não está bloqueado.");
-                                System.out.printf("Já foi bloqueado %s vezes.\n", c.lockAmount());
-                                System.out.printf("Está no momento na coluna %s - %s\n", c.columnId(), c.columnName());
+                                System.out.printf("Description: %s\n", c.description());
+                                System.out.println(c.locked() ? "It's locked. Reason: " + c.lockReason()
+                                        : "It's unlocked.");
+                                System.out.printf("Has been locked %s times.\n", c.lockAmount());
+                                System.out.printf("It's located in the column %s - %s.\n", c.columnId(), c.columnName());
                             },
-                            () -> System.out.printf("Não existe um card com o id %s\n", selectedCardId));
+                            () -> System.out.printf("No such card with id %s.\n", selectedCardId));
         }
     }
 
