@@ -87,9 +87,21 @@ public class BoardMenu {
         }
     }
 
-    private Object lockCard() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'lockCard'");
+    private void lockCard() throws SQLException {
+        System.out.println("Informe o id do card que será bloqueado:");
+        var cardId = scanner.nextLong();
+        System.out.println("Informe o motivo do bloqueio do card:");
+        var reason = scanner.next();
+        
+        var boardColumnsInfo = entity.getBoardColumns().stream()
+                .map(bc -> new BoardColumnInfoDTO(bc.getId(), bc.getOrder(), bc.getType()))
+                .toList();
+
+        try(var connection = getConnection()) {
+            new CardService(connection).lock(cardId, reason, boardColumnsInfo);
+        } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private Object unlockCard() {

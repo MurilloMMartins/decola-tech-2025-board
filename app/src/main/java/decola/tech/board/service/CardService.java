@@ -10,6 +10,7 @@ import decola.tech.board.exception.CardFinishedException;
 import decola.tech.board.exception.CardLockedException;
 import decola.tech.board.exception.EntityNotFoundException;
 import decola.tech.board.persistence.dao.CardDAO;
+import decola.tech.board.persistence.dao.LockDAO;
 import decola.tech.board.persistence.entity.BoardColumnTypeEnum;
 import decola.tech.board.persistence.entity.CardEntity;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,7 @@ public class CardService {
             var dao = new CardDAO(connection);
             var optional = dao.findById(cardId);
             var dto = optional.orElseThrow(
-                    () -> new EntityNotFoundException("O card de if %s não foi encontrado".formatted(cardId)));
+                    () -> new EntityNotFoundException("O card de id %s não foi encontrado".formatted(cardId)));
 
             if (dto.locked()) {
                 throw new CardLockedException(
@@ -63,12 +64,13 @@ public class CardService {
         }
     }
 
-    public void cancel(final Long cardId, final Long cancelColumnId, final List<BoardColumnInfoDTO> boardColumnsInfo) throws SQLException {
+    public void cancel(final Long cardId, final Long cancelColumnId, final List<BoardColumnInfoDTO> boardColumnsInfo)
+            throws SQLException {
         try {
             var dao = new CardDAO(connection);
             var optional = dao.findById(cardId);
             var dto = optional.orElseThrow(
-                    () -> new EntityNotFoundException("O card de if %s não foi encontrado".formatted(cardId)));
+                    () -> new EntityNotFoundException("O card de id %s não foi encontrado".formatted(cardId)));
 
             if (dto.locked()) {
                 throw new CardLockedException(
@@ -86,12 +88,44 @@ public class CardService {
             boardColumnsInfo.stream()
                     .filter(bc -> bc.order() == currentColumn.order() + 1)
                     .findFirst().orElseThrow(() -> new IllegalStateException("O card está cancelado."));
-            
+
             dao.moveToColumn(cancelColumnId, cardId);
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
             throw e;
+        }
+    }
+
+    public void lock(final Long id, final String reason, final List<BoardColumnInfoDTO> boardColumnsInfo)
+            throws SQLException {
+        try {
+            var dao = new CardDAO(connection);
+            var optional = dao.findById(id);
+            var dto = optional.orElseThrow(
+                    () -> new EntityNotFoundException("O card de id %s não foi encontrado".formatted(id)));
+            if (dto.locked()) {
+                throw new CardLockedException(
+                        "O card %s já está bloqueado.".formatted(id));
+            }
+
+            var currentColumn = boardColumnsInfo.stream()
+                    .filter(bc -> bc.id().equals(dto.columnId()))
+                    .findFirst()
+                    .orElseThrow();
+            if (currentColumn.type().equals(BoardColumnTypeEnum.COMPLETED)
+                    || currentColumn.type().equals(BoardColumnTypeEnum.CANCELED)) {
+                throw new IllegalStateException(
+                        "O card está em uma coluna do tipo %s e não pode ser bloqueado".formatted(currentColumn.type()));
+            }
+
+            var lockDAO = new LockDAO(connection);
+            lockDAO.lock(id, reason);
+
+            connection.commit();
+        } catch (SQLException ex) {
+            connection.rollback();
+            throw ex;
         }
     }
 }
