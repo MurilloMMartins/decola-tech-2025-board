@@ -87,7 +87,7 @@ public class CardDAO {
                 return Optional.of(dto);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
 }

@@ -23,4 +23,15 @@ public class LockDAO {
             statement.executeUpdate();
         }
     }
+    
+    public void unlock(final Long cardId, final String reason) throws SQLException {
+        var sql = "UPDATE locks SET unlocked_at = ?, unlock_reason = ? WHERE card_id = ? AND unlock_reason IS NULL;";
+        try (var statement = connection.prepareStatement(sql)) {
+            var i = 1;
+            statement.setTimestamp(i++, toTimestamp(OffsetDateTime.now()));
+            statement.setString(i++, reason);
+            statement.setLong(i++, cardId);
+            statement.executeUpdate();
+        }
+    }
 }

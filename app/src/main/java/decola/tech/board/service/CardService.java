@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import decola.tech.board.dto.BoardColumnInfoDTO;
-import decola.tech.board.dto.CardDetailsDTO;
 import decola.tech.board.exception.CardFinishedException;
 import decola.tech.board.exception.CardLockedException;
 import decola.tech.board.exception.EntityNotFoundException;
@@ -116,11 +115,33 @@ public class CardService {
             if (currentColumn.type().equals(BoardColumnTypeEnum.COMPLETED)
                     || currentColumn.type().equals(BoardColumnTypeEnum.CANCELED)) {
                 throw new IllegalStateException(
-                        "O card está em uma coluna do tipo %s e não pode ser bloqueado".formatted(currentColumn.type()));
+                        "O card está em uma coluna do tipo %s e não pode ser bloqueado"
+                                .formatted(currentColumn.type()));
             }
 
             var lockDAO = new LockDAO(connection);
             lockDAO.lock(id, reason);
+
+            connection.commit();
+        } catch (SQLException ex) {
+            connection.rollback();
+            throw ex;
+        }
+    }
+
+    public void unlock(final Long id, final String reason) throws SQLException {
+        try {
+            var dao = new CardDAO(connection);
+            var optional = dao.findById(id);
+            var dto = optional.orElseThrow(
+                    () -> new EntityNotFoundException("O card de id %s não foi encontrado".formatted(id)));
+            if (!dto.locked()) {
+                throw new CardLockedException(
+                        "O card %s não está bloqueado.".formatted(id));
+            }
+
+            var lockDAO = new LockDAO(connection);
+            lockDAO.unlock(id, reason);
 
             connection.commit();
         } catch (SQLException ex) {
